@@ -60,6 +60,8 @@
     dockerCompat = true;
   };
 
+  services.accounts-daemon.enable = true;
+
   programs.zsh.enable = true;
   programs.firefox.enable = true;
 
@@ -77,8 +79,15 @@
     libmtp
     gphoto2
     kdePackages.kio-extras
+    kdePackages.plasma-workspace
     zenity
   ];
+
+  environment.etc."xdg/menus/plasma-applications.menu".source =
+    "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
+
+  environment.etc."xdg/menus/applications.menu".source =
+    "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
 
   system.stateVersion = "25.05";
 }

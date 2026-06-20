@@ -11,6 +11,24 @@
       restartIfChanged = true;
     };
 
+    session = {
+      terminalOverride = "${pkgs.kitty}/bin/kitty -e ${pkgs.nushell}/bin/nu";
+
+      currentThemeName = "nord";
+      currentThemeCategory = "generic";
+
+      weatherLocation = "Porto Alegre, RS";
+      weatherCoordinates = "-30.0325,-51.2304";
+      weatherHourlyDetailed = true;
+
+      wallpaperPath = "/home/nan/Pictures/Wallpapers/16.png";
+      wallpaperPathDark = "/home/nan/Pictures/Wallpapers/16.png";
+      wallpaperCyclingEnabled = true;
+      wallpaperCyclingMode = "interval";
+      wallpaperCyclingInterval = 600;
+      wallpaperTransition = "fade";
+    };
+
     niri = {
       includes = {
         enable = true;

@@ -29,57 +29,6 @@
     enableGitIntegration = true;
   };
 
-  programs.yazi = {
-    enable = true;
-
-    shellWrapperName = "y";
-    enableZshIntegration = true;
-    enableBashIntegration = true;
-    enableNushellIntegration = true;
-
-    extraPackages = with pkgs.yaziPlugins; [
-      chmod
-      clipboard
-      compress
-      diff
-      drag
-      git
-      githead
-      gvfs
-      mediainfo
-      mime-ext
-      mount
-      nord
-      office
-      ouch
-      recycle-bin
-      rich-preview
-      smart-enter
-      wl-clipboard
-      yafg
-    ];
-
-    settings = {
-      manager = {
-        show_hidden = true;
-        sort_by = "mtime";
-        sort_sensitive = false;
-        sort_reverse = true;
-        sort_dir_first = true;
-        linemode = "size";
-      };
-
-      opener = {
-        open = [
-          {
-            run = "xdg-open \"$@\"";
-            desc = "Default";
-          }
-        ];
-      };
-    };
-  };
-
   programs.rclone.enable = true;
 
   xdg = {
@@ -110,10 +59,18 @@
   home.packages = with pkgs; [
     xdg-utils
     shared-mime-info
+    accountsservice
 
     vivaldi
+
+    ## KDE
     kdePackages.dolphin
+    kdePackages.systemsettings
+    kdePackages.xdg-desktop-portal-kde
     kdePackages.filelight
+    ffmpegthumbnailer
+    kdePackages.ffmpegthumbs
+
     qbittorrent
     cron
     wgnord

@@ -1,6 +1,9 @@
 { pkgs, inputs, ... }:
 
 {
+  imports = [
+    inputs.dms.nixosModules.greeter
+  ];
   services.xserver.enable = true;
   services.displayManager.gdm.enable = false;
 
