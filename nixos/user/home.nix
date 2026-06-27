@@ -19,6 +19,7 @@
     ./study.nix
     ./system.nix
     ./games.nix
+    ./apps.nix
     ./backup.nix
 
   ];

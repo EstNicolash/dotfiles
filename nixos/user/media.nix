@@ -39,6 +39,8 @@
 
   home.packages = with pkgs; [
     ffmpeg
-    # kdePackages.kdenlive  # Remova o comentário se quiser instalar nesta build
+    # kdePackages.kdenlive
+
+    freetube
   ];
 }

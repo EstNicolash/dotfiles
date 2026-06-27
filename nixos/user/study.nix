@@ -23,7 +23,6 @@
     obsidian
     calibre
     geogebra6
-    # anki
 
     hunspell
     hunspellDicts.en_US

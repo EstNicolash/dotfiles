@@ -35,6 +35,7 @@
       "R"
       "Rainbow CSV"
       "NeoCMake"
+      "activitywatch"
     ];
     userSettings = {
       features = {

@@ -70,6 +70,9 @@
     kdePackages.filelight
     ffmpegthumbnailer
     kdePackages.ffmpegthumbs
+    crow-translate
+    qalculate-qt
+    goldendict-ng
 
     qbittorrent
     cron
