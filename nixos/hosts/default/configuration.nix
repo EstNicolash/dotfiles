@@ -59,7 +59,6 @@
     enable = true;
     dockerCompat = true;
   };
-
   services.accounts-daemon.enable = true;
 
   programs.zsh.enable = true;

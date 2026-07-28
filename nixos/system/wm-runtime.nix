@@ -2,15 +2,16 @@
 
 {
   imports = [
-    inputs.dms.nixosModules.greeter
+    inputs.dank-greeter.nixosModules.default
   ];
+
   services.xserver.enable = true;
   services.displayManager.gdm.enable = false;
 
-  services.displayManager.dms-greeter = {
+  programs.dms-greeter = {
     enable = true;
 
-    package = inputs.dms.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    package = inputs.dank-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default;
     quickshell.package = pkgs.quickshell;
 
     compositor = {

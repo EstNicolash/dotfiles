@@ -30,6 +30,11 @@
     input = {
       keyboard = {
         numlock = true;
+        xkb = {
+          layout = "br";
+          variant = "abnt2";
+        };
+
       };
       touchpad = {
         tap = true;
@@ -97,18 +102,18 @@
 
     layer-rules = [
       {
-        matches = [ { namespace = "quickshell"; } ];
+        matches = [{ namespace = "quickshell"; }];
         place-within-backdrop = true;
       }
       {
-        matches = [ { namespace = "dms:blurwallpaper"; } ];
+        matches = [{ namespace = "dms:blurwallpaper"; }];
         place-within-backdrop = true;
       }
     ];
 
     window-rules = [
       {
-        matches = [ { app-id = "org.quickshell$"; } ];
+        matches = [{ app-id = "org.quickshell$"; }];
         open-floating = true;
       }
       {
@@ -121,11 +126,11 @@
         open-floating = true;
       }
       {
-        matches = [ { app-id = "kitty"; } ];
+        matches = [{ app-id = "kitty"; }];
         draw-border-with-background = false;
       }
       {
-        matches = [ { is-active = false; } ];
+        matches = [{ is-active = false; }];
         opacity = 1.0;
       }
       {

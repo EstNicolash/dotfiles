@@ -1,10 +1,6 @@
 { pkgs, lib, ... }:
 
 {
-  services.ollama = {
-    enable = true;
-    acceleration = "rocm";
-  };
 
   programs.anki = {
     enable = true;

@@ -22,6 +22,12 @@
     };
 
     stylix.url = "github:danth/stylix";
+
+
+    dank-greeter = {
+        url = "github:AvengeMedia/dank-greeter";
+        inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -35,6 +41,7 @@
           ./hosts/default/configuration.nix
           inputs.niri.nixosModules.niri
           inputs.stylix.nixosModules.stylix
+          #inputs.dank-greeter.nixosModules.default
         ];
       };
 

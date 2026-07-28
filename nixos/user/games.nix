@@ -3,7 +3,7 @@
 {
   home.packages = with pkgs; [
     lutris
-    bottles
+    #   bottles
     heroic
 
     # Envolva todo o bloco do override entre parênteses:
@@ -20,6 +20,7 @@
 
     pcsx2
     dolphin-emu
+    umu-launcher
 
     dualsensectl
   ];

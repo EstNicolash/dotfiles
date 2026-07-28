@@ -50,6 +50,7 @@
       "adbusers"
       "fuse"
       "audio"
+      "docker"
     ];
     shell = pkgs.nushell;
     packages = with pkgs; [ ];

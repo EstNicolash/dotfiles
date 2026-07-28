@@ -200,9 +200,11 @@
     deno
     typescript-language-server
 
-    # --- Bancos de Dados ---
     sqlite
     sqlite-web
     sqlitecpp
+
+    #android-tools
+    #scrcpy
   ];
 }
