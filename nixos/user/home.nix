@@ -18,9 +18,9 @@
     ./media.nix
     ./study.nix
     ./system.nix
-    ./games.nix
-    ./apps.nix
-    ./backup.nix
+    #./games.nix
+    #./apps.nix
+    #./backup.nix
 
   ];
 
@@ -29,7 +29,7 @@
 
   home.username = "nan";
   home.homeDirectory = "/home/nan";
-  home.stateVersion = "25.05";
+  home.stateVersion = "26.05";
 
   home.sessionVariables = {
     XDG_MENU_PREFIX = "plasma-";

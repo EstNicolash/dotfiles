@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, inputs, ... }:
 
 {
   home.packages = with pkgs; [
@@ -6,6 +6,9 @@
     playerctl
     kdePackages.qt6ct
   ];
+
+  # Aponta explicitamente para o niri-unstable para evitar quebras de compilação
+  programs.niri.package = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-unstable;
 
   services.gammastep = {
     enable = true;
@@ -34,7 +37,6 @@
           layout = "br";
           variant = "abnt2";
         };
-
       };
       touchpad = {
         tap = true;
@@ -84,6 +86,7 @@
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       QT_QPA_PLATFORMTHEME = "gtk3";
       QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+      NIXOS_OZONE_WL = "1";
     };
 
     spawn-at-startup = [
@@ -147,9 +150,69 @@
     config-notification.disable-failed = true;
 
     binds = {
-      # Atalhos nativos do seu ecossistema
-      "Mod+Shift+Slash".action.show-hotkey-overlay = { };
+      # --- Aplicações e Lançadores ---
       "Mod+T".action.spawn = "kitty";
+      "Mod+Space".action.spawn = [ "dms" "ipc" "call" "spotlight" "toggle" ];
+      "Mod+V".action.spawn = [ "dms" "ipc" "call" "clipboard" "toggle" ];
+      "Mod+M".action.spawn = [ "dms" "ipc" "call" "processlist" "toggle" ];
+      "Mod+Comma".action.spawn = [ "dms" "ipc" "call" "settings" "toggle" ];
+      "Mod+N".action.spawn = [ "dms" "ipc" "call" "notifications" "toggle" ];
+      "Mod+Shift+E".action.spawn = [ "dms" "ipc" "call" "powermenu" "toggle" ];
+      "Mod+Alt+L".action.spawn = [ "dms" "ipc" "call" "lock" "lockAndOutputsOff" ];
+      "Mod+Shift+Slash".action.show-hotkey-overlay = { };
+
+      # --- Controles do DMS: Áudio e Microfone ---
+      "XF86AudioRaiseVolume" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "audio" "increment" "3" ];
+      };
+      "XF86AudioLowerVolume" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "audio" "decrement" "3" ];
+      };
+      "XF86AudioMute" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "audio" "mute" ];
+      };
+      "XF86AudioMicMute" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "mic" "mute" ];
+      };
+
+      # --- Controles do DMS: Brilho da Tela ---
+      "XF86MonBrightnessUp" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "brightness" "increment" "5" ];
+      };
+      "XF86MonBrightnessDown" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "brightness" "decrement" "5" ];
+      };
+
+      # --- Controles de Mídia (MPRIS / Playerctl) ---
+      "XF86AudioPlay" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "mpris" "playPause" ];
+      };
+      "XF86AudioStop" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "mpris" "stop" ];
+      };
+      "XF86AudioPrev" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "mpris" "previous" ];
+      };
+      "XF86AudioNext" = {
+        allow-when-locked = true;
+        action.spawn = [ "dms" "ipc" "call" "mpris" "next" ];
+      };
+
+      # --- Screenshots integradas do DMS/Niri ---
+      "Print".action.spawn = [ "dms" "ipc" "call" "niri" "screenshot" ];
+      "Ctrl+Print".action.spawn = [ "dms" "ipc" "call" "niri" "screenshotScreen" ];
+      "Alt+Print".action.spawn = [ "dms" "ipc" "call" "niri" "screenshotWindow" ];
+
+      # --- Gerenciamento de Janelas e Navegação Niri ---
       "Mod+Q" = {
         repeat = false;
         action.close-window = { };
@@ -159,37 +222,6 @@
         action.toggle-overview = { };
       };
 
-      # Controles de mídia puros (Playerctl)
-      "XF86AudioPlay" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "play-pause"
-        ];
-      };
-      "XF86AudioStop" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "stop"
-        ];
-      };
-      "XF86AudioPrev" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "previous"
-        ];
-      };
-      "XF86AudioNext" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "next"
-        ];
-      };
-
-      # Movimentação e Navegação do Niri
       "Mod+Left".action.focus-column-left = { };
       "Mod+Down".action.focus-window-down = { };
       "Mod+Up".action.focus-window-up = { };
@@ -211,7 +243,7 @@
       "Mod+Home".action.focus-column-first = { };
       "Mod+End".action.focus-column-last = { };
 
-      # Workspaces
+      # --- Workspaces ---
       "Mod+1".action.focus-workspace = 1;
       "Mod+2".action.focus-workspace = 2;
       "Mod+3".action.focus-workspace = 3;
@@ -238,7 +270,8 @@
 
       "Mod+Alt+Ctrl+Left".action.move-column-to-monitor-left = { };
       "Mod+Alt+Ctrl+Right".action.move-column-to-monitor-right = { };
-      # Manipulação de Janelas
+
+      # --- Dimensionamento e Layout de Janelas ---
       "Mod+BracketLeft".action.consume-or-expel-window-left = { };
       "Mod+BracketRight".action.consume-or-expel-window-right = { };
       "Mod+Period".action.expel-window-from-column = { };
@@ -249,16 +282,10 @@
       "Mod+Equal".action.set-column-width = "+10%";
       "Mod+Alt+F".action.toggle-window-floating = { };
 
-      # Prints
-      "Print".action.screenshot = { };
-      "Ctrl+Print".action.screenshot-screen = { };
-      "Alt+Print".action.screenshot-window = { };
-
       "Mod+Escape" = {
         allow-inhibiting = false;
         action.toggle-keyboard-shortcuts-inhibit = { };
       };
-      "Mod+Shift+E".action.quit = { };
     };
   };
 }

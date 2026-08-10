@@ -32,7 +32,7 @@
     niri = {
       includes = {
         enable = true;
-        override = false;
+        override = true;
         originalFileName = "hm";
         filesToInclude = [
           "alttab"
@@ -47,7 +47,7 @@
 
     enableSystemMonitoring = true;
     enableVPN = true;
-    enableDynamicTheming = true;
+    enableDynamicTheming = false;
     enableAudioWavelength = true;
     enableCalendarEvents = true;
     enableClipboardPaste = true;

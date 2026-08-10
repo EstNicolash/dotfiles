@@ -41,6 +41,6 @@
     ffmpeg
     # kdePackages.kdenlive
 
-    freetube
+    #freetube
   ];
 }

@@ -7,7 +7,8 @@
     nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
 
     niri = {
-      url = "github:sodiboo/niri-flake";
+      #url = "github:sodiboo/niri-flake";
+      url = "github:sodiboo/niri-flake?rev=6bb99ff875919f03ea6054026619d999061e1170";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -38,7 +39,7 @@
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [
-          ./hosts/default/configuration.nix
+          ./hosts/lab210/configuration.nix
           inputs.niri.nixosModules.niri
           inputs.stylix.nixosModules.stylix
           #inputs.dank-greeter.nixosModules.default
