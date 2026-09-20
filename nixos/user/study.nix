@@ -18,6 +18,8 @@
   home.packages = with pkgs; [
     obsidian
     calibre
+    sioyek
+    spedread
     geogebra6
 
     hunspell

@@ -10,7 +10,7 @@
 
     polarity = "dark";
     base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
-    image = "/home/nan/Pictures/Wallpapers/xavier-cuenca-w4-3.jpg";
+    #image = "/home/nan/Pictures/Wallpapers/xavier-cuenca-w4-3.jpg";
 
     cursor = {
       package = pkgs.bibata-cursors;

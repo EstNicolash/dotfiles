@@ -3,8 +3,9 @@
 {
 
   home.packages = with pkgs; [
-    ferdium
+    #ferdium
     shiori
+    microsoft-edge
 
   ];
 
