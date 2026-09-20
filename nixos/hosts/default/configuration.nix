@@ -63,9 +63,11 @@
 
   programs.zsh.enable = true;
   programs.firefox.enable = true;
+  programs.wireshark.enable = true;
 
   environment.systemPackages = with pkgs; [
     vim
+    wireshark
     nushell
     wget
     home-manager

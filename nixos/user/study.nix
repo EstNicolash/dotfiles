@@ -18,7 +18,10 @@
   home.packages = with pkgs; [
     obsidian
     calibre
-   # geogebra6
+
+    sioyek
+    spedread
+    #geogebra6
 
     hunspell
     hunspellDicts.en_US
