@@ -43,6 +43,10 @@
   services.udisks2.enable = true;
   services.gvfs.enable = true;
   services.flatpak.enable = true;
+
+  virtualisation.libvirtd.enable = true;
+  programs.virt-manager.enable = true;
+
   services.dbus.enable = true;
   security.polkit.enable = true;
   nixpkgs.config.allowUnfree = true;
@@ -82,6 +86,7 @@
     kdePackages.kio-extras
     kdePackages.plasma-workspace
     zenity
+    virt-v2v
   ];
 
   environment.etc."xdg/menus/plasma-applications.menu".source =

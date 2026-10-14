@@ -11,7 +11,9 @@
       additionalPrograms = [ ffmpeg ];
       jdks = [
         graalvmPackages.graalvm-ce
+        graalvmPackages.graalvm-oracle_17
         zulu
+        zulu17
       ];
     })
 
