@@ -76,9 +76,4 @@
       discordBranch = "canary";
     };
   };
-
-  home.packages = with pkgs; [
-    teams-for-linux
-  ];
-
 }

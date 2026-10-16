@@ -51,8 +51,6 @@
       "fuse"
       "audio"
       "docker"
-      "wireshark"
-      "libvirtd"
     ];
     shell = pkgs.nushell;
     packages = with pkgs; [ ];
