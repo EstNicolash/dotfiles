@@ -1,14 +1,36 @@
+# ==============================================================================
+# Communication & Collaboration (nixos/user/comm.nix)
+#
+# Configures Vesktop (Wayland-native Discord client with PipeWire audio share,
+# arRPC, and declarative Vencord plugins).
+# ==============================================================================
 { pkgs, ... }:
 
 {
+  # ----------------------------------------------------------------------------
+  # Vesktop (Declarative Vencord + Wayland/PipeWire Audio Share)
+  # ----------------------------------------------------------------------------
   programs.vesktop = {
     enable = true;
+
+    settings = {
+      arRPC = true;
+      checkUpdates = false;
+      customTitleBar = false;
+      disableMinSize = true;
+      splashTheming = true;
+      staticTitle = true;
+      hardwareAcceleration = true;
+      discordBranch = "canary";
+    };
+
     vencord.settings = {
-      autoUpdate = true;
+      autoUpdate = false;
       autoUpdateNotification = false;
       notifyAboutUpdates = false;
       useQuickCss = true;
       disableMinSize = true;
+
       plugins = {
         MessageLogger = {
           enabled = true;
@@ -30,6 +52,7 @@
         CtrlEnterSend.enabled = true;
         CustomRPC.enabled = true;
         Experiments.enabled = true;
+        FakeNitro.enabled = true;
         FavoriteGifSearch.enabled = true;
         FixImagesQuality.enabled = true;
         ForceOwnerCrown.enabled = true;
@@ -58,27 +81,21 @@
         TypingTweaks.enabled = true;
         UserVoiceShow.enabled = true;
         ValidUser.enabled = true;
-        WebScreenShareFixes.enabled = true;
-        WhoReacted.enabled = true;
         VoiceChatDoubleClick.enabled = true;
         ViewIcons.enabled = true;
         VencordToolbox.enabled = true;
-        FakeNitro.enabled = true;
+        WebScreenShareFixes.enabled = true;
+        WhoReacted.enabled = true;
       };
-    };
-    settings = {
-      checkUpdates = true;
-      customTitleBar = false;
-      disableMinSize = true;
-      splashTheming = true;
-      staticTitle = true;
-      hardwareAcceleration = true;
-      discordBranch = "canary";
     };
   };
 
+  # ----------------------------------------------------------------------------
+  # Voice & Messaging Clients
+  # ----------------------------------------------------------------------------
   home.packages = with pkgs; [
+    teamspeak6-client
     teams-for-linux
+    fractal
   ];
-
 }

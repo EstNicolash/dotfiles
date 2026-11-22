@@ -1,60 +1,41 @@
-{ config, pkgs, ... }:
+# ==============================================================================
+# Host-Specific Hardware Configuration (nixos/hosts/default/host-specific.nix)
+#
+# Defines machine-specific settings tied to physical hardware on this host:
+# disk encryption (LUKS), hostname, AMD GPU drivers, graphics acceleration,
+# and Bluetooth support.
+# ==============================================================================
+{ pkgs, ... }:
 
 {
-  boot.initrd.luks.devices."luks-153a094a-1996-451c-91be-a43209c690e4".device =
-    "/dev/disk/by-uuid/153a094a-1996-451c-91be-a43209c690e4";
+  # ----------------------------------------------------------------------------
+  # Host Identity & Storage
+  # ----------------------------------------------------------------------------
+  networking.hostName = "nixos";
 
+  boot.initrd.luks.devices."luks-153a094a-1996-451c-91be-a43209c690e4" = {
+    device = "/dev/disk/by-uuid/153a094a-1996-451c-91be-a43209c690e4";
+    # Enable TRIM passthrough for NVMe SSD health and write performance
+    allowDiscards = true;
+  };
+
+  # ----------------------------------------------------------------------------
+  # Graphics & Hardware Acceleration (AMD GPU)
+  # ----------------------------------------------------------------------------
   services.xserver.videoDrivers = [ "amdgpu" ];
-  hardware.bluetooth.enable = true;
 
   hardware.graphics = {
     enable = true;
+    # Required for 32-bit applications (Steam, Proton, Wine, umu-run)
     enable32Bit = true;
+    # Mesa and vulkan-loader are included automatically; only add extra ICDs
     extraPackages = with pkgs; [
-      mesa
-      vulkan-loader
-      vulkan-tools
       rocmPackages.clr.icd
     ];
   };
 
-  networking.hostName = "nixos";
-  time.timeZone = "America/Sao_Paulo";
-
-  services.xserver.xkb = {
-    layout = "br";
-    variant = "";
-  };
-  console.keyMap = "br-abnt2";
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "pt_BR.UTF-8";
-    LC_IDENTIFICATION = "pt_BR.UTF-8";
-    LC_MEASUREMENT = "pt_BR.UTF-8";
-    LC_MONETARY = "pt_BR.UTF-8";
-    LC_NAME = "pt_BR.UTF-8";
-    LC_NUMERIC = "pt_BR.UTF-8";
-    LC_PAPER = "pt_BR.UTF-8";
-    LC_TELEPHONE = "pt_BR.UTF-8";
-    LC_TIME = "pt_BR.UTF-8";
-  };
-
-  users.users.nan = {
-    isNormalUser = true;
-    description = "Nicolas A. N. S.";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-      "video"
-      "gamemode"
-      "adbusers"
-      "fuse"
-      "audio"
-      "docker"
-      "wireshark"
-      "libvirtd"
-    ];
-    shell = pkgs.nushell;
-    packages = with pkgs; [ ];
-  };
+  # ----------------------------------------------------------------------------
+  # Peripherals
+  # ----------------------------------------------------------------------------
+  hardware.bluetooth.enable = true;
 }

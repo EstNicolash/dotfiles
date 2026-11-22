@@ -1,3 +1,11 @@
+# ==============================================================================
+# Wayland Desktop & Window Manager Runtime (nixos/system/wm-runtime.nix)
+#
+# Configures the system-level graphical runtime required by Niri and
+# DankMaterialShell: display manager (dms-greeter), Niri compositor,
+# XDG desktop portals, PipeWire audio stack, Polkit, Flatpak, and XWayland
+# compatibility via xwayland-satellite.
+# ==============================================================================
 { pkgs, inputs, ... }:
 
 {
@@ -5,55 +13,80 @@
     inputs.dank-greeter.nixosModules.default
   ];
 
-  services.xserver.enable = true;
-  services.displayManager.gdm.enable = false;
-
-  programs.dms-greeter = {
-    enable = true;
-
-    package = inputs.dank-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default;
-    quickshell.package = pkgs.quickshell;
-
-    compositor = {
-      name = "niri";
+  # ----------------------------------------------------------------------------
+  # Display Manager & Wayland Compositor
+  # ----------------------------------------------------------------------------
+  programs = {
+    dms-greeter = {
+      enable = true;
+      package = inputs.dank-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      compositor.name = "niri";
+      configHome = "/home/nan";
     };
 
-    configHome = "/home/nan";
+    niri = {
+      enable = true;
+      package = pkgs.niri-unstable;
+    };
   };
 
-  programs.niri = {
-    enable = true;
-    package = pkgs.niri-unstable;
-  };
-
-  nix.settings.substituters = [ "https://niri.cachix.org" ];
-  nix.settings.trusted-public-keys = [
-    "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
-  ];
-
+  # ----------------------------------------------------------------------------
+  # XDG Desktop Portals & Secrets
+  # ----------------------------------------------------------------------------
+  # Use GTK file chooser portal and GNOME portal
+  # for PipeWire screen casting in Niri.
   xdg.portal = {
     enable = true;
     config.niri = {
-      default = [ "kde" ];
+      default = [ "gtk" ];
       "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
     };
     extraPortals = with pkgs; [
-      kdePackages.xdg-desktop-portal-kde
       xdg-desktop-portal-gtk
       xdg-desktop-portal-gnome
     ];
   };
 
+  services.gnome.gnome-keyring.enable = true;
+
+  # ----------------------------------------------------------------------------
+  # Audio Stack (PipeWire)
+  # ----------------------------------------------------------------------------
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+
+    # Avoids Codec changes
+    wireplumber.extraConfig."51-bluetooth-profile" = {
+      "wireplumber.settings" = {
+        "bluetooth.autoswitch-to-headset-profile" = false;
+      };
+    };
+  };
+
+  # ----------------------------------------------------------------------------
+  # Privilege Elevation, Accounts & Flatpak Support
+  # ----------------------------------------------------------------------------
+  security.polkit.enable = true;
+  services.accounts-daemon.enable = true;
+  services.flatpak.enable = true;
+
+  # ----------------------------------------------------------------------------
+  # Wayland Environment & X11 Compatibility
+  # ----------------------------------------------------------------------------
+  # Force Electron/Chromium apps to use native Wayland backend
   environment.sessionVariables = {
-    WLR_NO_HARDWARE_CURSORS = "1";
     NIXOS_OZONE_WL = "1";
   };
 
   environment.systemPackages = with pkgs; [
-    wayland
-    xwayland
+    # Rootless XWayland integration required by Niri for X11 apps (e.g., Steam)
     xwayland-satellite
-    mate-polkit
+    # Dialog helper used by scripts and third-party launchers
+    zenity
   ];
 }

@@ -1,46 +1,51 @@
+# ==============================================================================
+# Multimedia, Streaming & Recording (nixos/user/media.nix)
+#
+# Configures MPV video player (with Wayland/VA-API hardware decoding & MPRIS),
+# OBS Studio with clean PipeWire/Vulkan capture plugins, Rust-based GTK4 audio
+# playback (Amberol), audio editing (Tenacity), and yt-dlp.
+# ==============================================================================
 { pkgs, ... }:
 
 {
+  # ----------------------------------------------------------------------------
+  # OBS Studio (Wayland PipeWire & Vulkan Game Capture)
+  # ----------------------------------------------------------------------------
   programs.obs-studio = {
     enable = true;
     plugins = with pkgs.obs-studio-plugins; [
-      wlrobs
-      obs-backgroundremoval
       obs-pipewire-audio-capture
-      obs-vaapi
-      obs-gstreamer
       obs-vkcapture
+      obs-backgroundremoval
+      obs-gstreamer
     ];
   };
 
-  programs.cava = {
+  # ----------------------------------------------------------------------------
+  # MPV Video Player (Wayland Native, Hardware Acceleration & Streaming Cache)
+  # ----------------------------------------------------------------------------
+  programs.mpv = {
     enable = true;
-    settings = {
-      general.channels = "mono";
-      color = {
-        gradient = 1;
-        gradient_count = 6;
-        gradient_color_1 = "'#5E81AC'"; # Nord 10
-        gradient_color_2 = "'#81A1C1'"; # Nord 9
-        gradient_color_3 = "'#88C0D0'"; # Nord 8
-        gradient_color_4 = "'#8FBCBB'"; # Nord 7
-        gradient_color_5 = "'#B48EAD'"; # Nord 15
-        gradient_color_6 = "'#A3BE8C'"; # Nord 14
-      };
-      smoothing = {
-        monstercat = 0;
-        waves = 0;
-        integral = 85;
-        gravity = 90;
-        noise_reduction = 80;
-      };
+    defaultProfiles = [ "high-quality" ];
+    scripts = with pkgs.mpvScripts; [ mpris ];
+
+    config = {
+      vo = "gpu-next";
+      hwdec = "auto-safe";
+      cache = "yes";
+      demuxer-max-bytes = "1024MiB";
+      demuxer-max-back-bytes = "512MiB";
+      demuxer-readahead-secs = "300";
+      ytdl-format = "bestvideo[height<=1080]+bestaudio/best[height<=1080]";
     };
   };
 
+  # ----------------------------------------------------------------------------
+  # Audio/Video Utilities & Rust GTK4 Music Player
+  # ----------------------------------------------------------------------------
   home.packages = with pkgs; [
-    ffmpeg
-    # kdePackages.kdenlive
-
-    freetube
+    yt-dlp
+    tenacity
+    amberol
   ];
 }

@@ -1,99 +1,85 @@
+# ==============================================================================
+# Host System Configuration (nixos/hosts/default/configuration.nix)
+#
+# Entry point for the NixOS system configuration on this host.
+# Aggregates hardware-specific definitions and shared system modules,
+# configures the bootloader, CachyOS LTO kernel, kernel modules, scheduler,
+# and essential system-wide packages.
+# ==============================================================================
 { config, pkgs, ... }:
 
 {
+  # ----------------------------------------------------------------------------
+  # Module Imports
+  # ----------------------------------------------------------------------------
   imports = [
+    # Host-specific hardware & device definitions
     ./hardware-configuration.nix
     ./host-specific.nix
+
+    # Shared system-wide modules
     ../../system/core.nix
     ../../system/wm-runtime.nix
     ../../system/games.nix
     ../../system/theme.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.cachyosKernels."linuxPackages-cachyos-latest-lto-x86_64-v3";
+  # ----------------------------------------------------------------------------
+  # Bootloader & Kernel
+  # ----------------------------------------------------------------------------
+  boot = {
+    loader = {
+      systemd-boot = {
+        enable = true;
+        # Cap boot entries to prevent filling up the EFI system partition
+        configurationLimit = 10;
+      };
+      efi.canTouchEfiVariables = true;
+    };
 
-  boot.kernel.sysctl = {
-    "fs.inotify.max_user_watches" = 524288;
+    # CachyOS kernel compiled with LTO and x86_64-v3 optimizations (Zen 3)
+    kernelPackages = pkgs.cachyosKernels."linuxPackages-cachyos-latest-lto-x86_64-v3";
+
+    # Raise file watcher limit for IDEs, compilers, and language servers
+    kernel.sysctl = {
+      "fs.inotify.max_user_watches" = 524288;
+    };
+
+    # Virtual webcam kernel module (used by OBS Studio)
+    kernelModules = [ "v4l2loopback" ];
+    extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
+    extraModprobeConfig = ''
+      options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
+    '';
   };
-  boot.kernelModules = [
-    "fuse"
-    "v4l2loopback"
-  ];
-  boot.extraModulePackages = with config.boot.kernelPackages; [ v4l2loopback ];
-  boot.extraModprobeConfig = ''
-    options v4l2loopback devices=1 video_nr=1 card_label="OBS Cam" exclusive_caps=1
-  '';
 
-  services.scx.enable = true;
-
-  nix.settings.auto-optimise-store = true;
-  nix.settings.max-jobs = 4;
-  nix.settings.cores = 6;
-  nix.gc = {
-    automatic = true;
-    persistent = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
-  };
-
-  networking.networkmanager.enable = true;
-  services.resolved.enable = true;
-  services.udisks2.enable = true;
-  services.gvfs.enable = true;
-  services.flatpak.enable = true;
-
-  virtualisation.libvirtd.enable = true;
-  programs.virt-manager.enable = true;
-
-  services.dbus.enable = true;
-  security.polkit.enable = true;
-  nixpkgs.config.allowUnfree = true;
-
-  security.rtkit.enable = true;
-  services.pipewire = {
+  # Enable sched_ext BPF CPU scheduler loader (pairs with CachyOS kernel)
+  services.scx-loader = {
     enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
+    config = {
+      default_sched = "scx_lavd";
+      default_mode = "Auto";
+    };
   };
 
-  virtualisation.podman = {
-    enable = true;
-    dockerCompat = true;
-  };
-  services.accounts-daemon.enable = true;
-
-  programs.zsh.enable = true;
-  programs.firefox.enable = true;
-  programs.wireshark.enable = true;
-
+  # ----------------------------------------------------------------------------
+  # Essential System-Wide Packages
+  # ----------------------------------------------------------------------------
+  # Keep global packages minimal; user CLI/GUI apps belong in Home Manager.
   environment.systemPackages = with pkgs; [
+    # Emergency root/TTY editor fallback
     vim
-    wireshark
-    nushell
-    wget
-    home-manager
-    distrobox
-    distroshelf
+
+    # Hardware, video acceleration, and camera/MTP device utilities
     libva-utils
     v4l-utils
-    cachix
-    xcb-util-cursor
     libmtp
     gphoto2
-    kdePackages.kio-extras
-    kdePackages.plasma-workspace
-    zenity
-    virt-v2v
   ];
 
-  environment.etc."xdg/menus/plasma-applications.menu".source =
-    "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
-
-  environment.etc."xdg/menus/applications.menu".source =
-    "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
-
+  # ----------------------------------------------------------------------------
+  # NixOS State Version
+  # ----------------------------------------------------------------------------
+  # Do not change unless performing a full manual state migration.
   system.stateVersion = "25.05";
 }

@@ -1,32 +1,52 @@
-{ pkgs, lib, ... }:
+# ==============================================================================
+#
+# Niri Wayland Compositor Configuration (nixos/user/desktop/wm.nix)
+#
+# Configures Niri input devices, scrollable tiling layout, layer/window rules,
+# and custom compositor keybindings.
+# ==============================================================================
+{ ... }:
 
 {
-  home.packages = with pkgs; [
-    fuzzel
-    playerctl
-    kdePackages.qt6ct
-  ];
-
-  services.gammastep = {
-    enable = true;
-    tray = true;
-    provider = "manual";
-    longitude = -51.2303767;
-    latitude = -30.0324999;
-
-    settings = {
-      general = {
-        method = "wlr";
-        temp-day = lib.mkForce 6500;
-        temp-night = lib.mkForce 3300;
-        fade = 1;
-        gamma-day = 1.0;
-        gamma-night = 0.7;
-      };
-    };
-  };
 
   programs.niri.settings = {
+
+    outputs = {
+      "DP-1" = {
+        focus-at-startup = true;
+        mode = {
+          width = 1920;
+          height = 1080;
+          refresh = 179.998;
+        };
+        position = {
+          x = 1920;
+          y = 0;
+        };
+        variable-refresh-rate = "on-demand";
+      };
+
+      "HDMI-A-1" = {
+        mode = {
+          width = 1920;
+          height = 1080;
+          refresh = 60.000;
+        };
+        position = {
+          x = 0;
+          y = 0;
+        };
+        variable-refresh-rate = false;
+      };
+    };
+
+    spawn-at-startup = [
+      { command = [ "xrandr" "--output" "DP-1" "--primary" ]; }
+    ];
+
+    # --------------------------------------------------------------------------
+    # Input Devices
+    # --------------------------------------------------------------------------
     input = {
       keyboard = {
         numlock = true;
@@ -34,14 +54,17 @@
           layout = "br";
           variant = "abnt2";
         };
-
       };
+
       touchpad = {
         tap = true;
         natural-scroll = true;
       };
     };
 
+    # --------------------------------------------------------------------------
+    # Scrollable Tiling Layout & Aesthetics
+    # --------------------------------------------------------------------------
     layout = {
       gaps = 8;
       background-color = "transparent";
@@ -57,11 +80,12 @@
         proportion = 0.5;
       };
 
+
       focus-ring = {
         enable = true;
         width = 2;
-        active.color = "#d08770";
-        inactive.color = "#505050";
+        active.color = "#e6c384";
+        inactive.color = "#54546d";
       };
 
       border.enable = false;
@@ -78,61 +102,43 @@
       };
     };
 
+    # --------------------------------------------------------------------------
+    # Wayland Environment & General Behavior
+    # --------------------------------------------------------------------------
     environment = {
       XDG_CURRENT_DESKTOP = "niri";
       QT_QPA_PLATFORM = "wayland";
-      ELECTRON_OZONE_PLATFORM_HINT = "auto";
-      QT_QPA_PLATFORMTHEME = "gtk3";
-      QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+      GTK_DECORATION_LAYOUT = "";
+      TERMINAL = "ghostty";
     };
 
-    spawn-at-startup = [
-      {
-        command = [
-          "bash"
-          "-c"
-          "wl-paste --watch cliphist store &"
-        ];
-      }
-    ];
-
     hotkey-overlay.skip-at-startup = true;
-    screenshot-path = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
+    screenshot-path = "~/Pictures/Screenshots/Screenshot-%Y-%m-%d_%H-%M-%S.png";
     animations.enable = true;
+    config-notification.disable-failed = true;
 
+    # --------------------------------------------------------------------------
+    # Layer & Window Rules
+    # --------------------------------------------------------------------------
     layer-rules = [
+      # Place DMS wallpaper & blur surfaces into Niri's overview backdrop
       {
-        matches = [{ namespace = "quickshell"; }];
+        matches = [ { namespace = "^quickshell$"; } ];
         place-within-backdrop = true;
       }
       {
-        matches = [{ namespace = "dms:blurwallpaper"; }];
+        matches = [ { namespace = "^dms:blurwallpaper$"; } ];
         place-within-backdrop = true;
+      }
+      # Block clipboard history from screen captures/recordings
+      {
+        matches = [ { namespace = "^dms:clipboard$"; } ];
+        block-out-from = "screencast";
       }
     ];
 
     window-rules = [
-      {
-        matches = [{ app-id = "org.quickshell$"; }];
-        open-floating = true;
-      }
-      {
-        matches = [
-          {
-            app-id = "firefox$";
-            title = "^Picture-in-Picture$";
-          }
-        ];
-        open-floating = true;
-      }
-      {
-        matches = [{ app-id = "kitty"; }];
-        draw-border-with-background = false;
-      }
-      {
-        matches = [{ is-active = false; }];
-        opacity = 1.0;
-      }
+      # Rounded corners for all windows
       {
         geometry-corner-radius = {
           top-left = 12.0;
@@ -142,14 +148,98 @@
         };
         clip-to-geometry = true;
       }
+
+      # Floating DMS dialogs & Dux Files open/save portals
+      {
+        matches = [ { app-id = "^dev\\.duxlabs\\.shell$"; } ];
+        open-floating = true;
+      }
+      {
+        matches = [
+          {
+            app-id = "^dev\\.duxlabs\\.files$";
+            title = "^(Open|Save|Select|Upload|Export|Import)";
+          }
+        ];
+        open-floating = true;
+      }
+
+      # Floating browser Picture-in-Picture
+      {
+        matches = [
+          {
+            app-id = "^(firefox|zen.*)$";
+            title = "^Picture-in-Picture$";
+          }
+        ];
+        open-floating = true;
+      }
+
+      # Disable compositor border behind Ghostty background
+      {
+        matches = [ { app-id = "^com\\.mitchellh\\.ghostty$"; } ];
+        draw-border-with-background = false;
+      }
+
+      {
+        matches = [
+          { app-id = "^heroic$"; }
+          { app-id = "^hu\\.kramo\\.Cartridges$"; }
+          { app-id = "^org\\.prismlauncher\\.PrismLauncher$"; }
+          { app-id = "(?i)^recomp[-_]?launcher$"; }
+        ];
+        open-on-output = "DP-1";
+      }
+
+      {
+        matches = [
+          { app-id = "^gamescope$"; }
+          { app-id = "^steam_app_.*$"; }
+          { app-id = "(?i).*\\.exe$"; }
+
+          { title = "^Minecraft.*"; }
+          { app-id = "(?i)^brogue(-ce)?$"; }
+
+          { app-id = "(?i).*(recomp|prime).*"; }
+
+          { app-id = "(?i).*(azahar|dolphin-emu|pcsx2|bsnes|mesen|mgba|sameboy).*"; }
+        ];
+        open-on-output = "DP-1";
+        open-fullscreen = true;
+      }
     ];
 
-    config-notification.disable-failed = true;
-
+    # --------------------------------------------------------------------------
+    # Custom Keybindings (DMS shell binds are loaded via dms/binds.kdl)
+    # --------------------------------------------------------------------------
     binds = {
-      # Atalhos nativos do seu ecossistema
-      "Mod+Shift+Slash".action.show-hotkey-overlay = { };
-      "Mod+T".action.spawn = "kitty";
+      # Core applications & Dux suite shortcuts
+      "Mod+T".action.spawn = [ "ghostty" "+new-window" ];
+      "Mod+Return".action.spawn = [ "ghostty" "+toggle-quick-terminal" ];
+
+      "Mod+Shift+S".action.spawn = [ "dms" "ipc" "call" "quickCapture" "toggle" ];
+      "Mod+G".action.spawn = [ "dms" "ipc" "call" "pullWindow" "toggle" ];
+      "Mod+X".action.spawn = [ "dms" "ipc" "call" "powermenu" "toggle" ];
+
+      "Mod+E".action.spawn = [
+        "dfiles"
+        "ipc"
+        "ui.toggle"
+      ];
+      "Mod+Shift+C".action.spawn = [
+        "dcal"
+        "ipc"
+        "ui.toggle"
+      ];
+      "Alt+Space".action.spawn = [
+        "dms"
+        "ipc"
+        "call"
+        "spotlight-bar"
+        "toggle"
+      ];
+
+      # Window & overview management
       "Mod+Q" = {
         repeat = false;
         action.close-window = { };
@@ -158,38 +248,11 @@
         repeat = false;
         action.toggle-overview = { };
       };
+      "Mod+Alt+F".action.toggle-window-floating = { };
+      "Mod+F".action.maximize-column = { };
+      "Mod+Shift+F".action.fullscreen-window = { };
 
-      # Controles de mídia puros (Playerctl)
-      "XF86AudioPlay" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "play-pause"
-        ];
-      };
-      "XF86AudioStop" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "stop"
-        ];
-      };
-      "XF86AudioPrev" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "previous"
-        ];
-      };
-      "XF86AudioNext" = {
-        allow-when-locked = true;
-        action.spawn = [
-          "playerctl"
-          "next"
-        ];
-      };
-
-      # Movimentação e Navegação do Niri
+      # Column navigation (Arrows & Vim keys)
       "Mod+Left".action.focus-column-left = { };
       "Mod+Down".action.focus-window-down = { };
       "Mod+Up".action.focus-window-up = { };
@@ -211,6 +274,14 @@
       "Mod+Home".action.focus-column-first = { };
       "Mod+End".action.focus-column-last = { };
 
+      # Column sizing & grouping
+      "Mod+BracketLeft".action.consume-or-expel-window-left = { };
+      "Mod+BracketRight".action.consume-or-expel-window-right = { };
+      "Mod+Period".action.expel-window-from-column = { };
+      "Mod+R".action.switch-preset-column-width = { };
+      "Mod+Minus".action.set-column-width = "-10%";
+      "Mod+Equal".action.set-column-width = "+10%";
+
       # Workspaces
       "Mod+1".action.focus-workspace = 1;
       "Mod+2".action.focus-workspace = 2;
@@ -231,29 +302,20 @@
       "Mod+Ctrl+8".action.move-column-to-workspace = 8;
       "Mod+Ctrl+9".action.move-column-to-workspace = 9;
 
+      # Multi-monitor navigation
       "Mod+Alt+Left".action.focus-monitor-left = { };
       "Mod+Alt+Right".action.focus-monitor-right = { };
       "Mod+Alt+Up".action.focus-monitor-up = { };
       "Mod+Alt+Down".action.focus-monitor-down = { };
-
       "Mod+Alt+Ctrl+Left".action.move-column-to-monitor-left = { };
       "Mod+Alt+Ctrl+Right".action.move-column-to-monitor-right = { };
-      # Manipulação de Janelas
-      "Mod+BracketLeft".action.consume-or-expel-window-left = { };
-      "Mod+BracketRight".action.consume-or-expel-window-right = { };
-      "Mod+Period".action.expel-window-from-column = { };
-      "Mod+R".action.switch-preset-column-width = { };
-      "Mod+F".action.maximize-column = { };
-      "Mod+Shift+F".action.fullscreen-window = { };
-      "Mod+Minus".action.set-column-width = "-10%";
-      "Mod+Equal".action.set-column-width = "+10%";
-      "Mod+Alt+F".action.toggle-window-floating = { };
 
-      # Prints
+      # Screenshots
       "Print".action.screenshot = { };
       "Ctrl+Print".action.screenshot-screen = { };
       "Alt+Print".action.screenshot-window = { };
 
+      # Session & escape hatch
       "Mod+Escape" = {
         allow-inhibiting = false;
         action.toggle-keyboard-shortcuts-inhibit = { };

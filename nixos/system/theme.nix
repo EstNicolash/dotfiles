@@ -1,50 +1,54 @@
+# ==============================================================================
+# System-Wide Stylix Theming (nixos/system/theme.nix)
+#
+# Configures global Stylix polarity, Kanagawa color scheme, cursor theme,
+# and system typography (monospace, sans-serif, serif, and font sizes).
+# ==============================================================================
 { pkgs, ... }:
 
 {
-  fonts.fontconfig.enable = true;
-
   stylix = {
     enable = true;
-    autoEnable = true;
-    targets.kmscon.enable = false;
-
     polarity = "dark";
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
-    #image = "/home/nan/Pictures/Wallpapers/xavier-cuenca-w4-3.jpg";
 
+    # Kanagawa Wave base16 scheme (bundled in base16-schemes)
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/kanagawa.yaml";
+
+    # Cursor theme
     cursor = {
       package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Ice";
+      name = "Bibata-Modern-Classic";
       size = 24;
     };
 
+    # System Typography
     fonts = {
       monospace = {
         package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font Mono";
+        name = "JetBrainsMono Nerd Font";
       };
+
       sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        package = pkgs.inter;
+        name = "Inter";
       };
+
       serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
+        package = pkgs.noto-fonts;
+        name = "Noto Serif";
+      };
+
+      emoji = {
+        package = pkgs.noto-fonts-color-emoji;
+        name = "Noto Color Emoji";
       };
 
       sizes = {
-        applications = 12;
-        terminal = 14;
-        desktop = 10;
-        popups = 10;
+        applications = 11;
+        terminal = 12;
+        desktop = 11;
+        popups = 11;
       };
-    };
-
-    opacity = {
-      applications = 1.0;
-      terminal = 1.0;
-      desktop = 1.0;
-      popups = 1.0;
     };
   };
 }

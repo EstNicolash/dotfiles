@@ -1,51 +1,55 @@
-{
-  config,
-  pkgs,
-  inputs,
-  ...
-}:
+# ==============================================================================
+# Home Manager Entry Point (nixos/user/home.nix)
+#
+# Aggregates modular user-space configurations (shell, development, desktop,
+# media, study, gaming, and applications) and defines core user identity,
+# nixpkgs settings, and Home Manager state version.
+# ==============================================================================
+{ ... }:
 
 {
+  # ----------------------------------------------------------------------------
+  # User Module Imports
+  # ----------------------------------------------------------------------------
   imports = [
+    # Core CLI & development environment
     ./terminal.nix
     ./dev.nix
+    ./system.nix
 
-    ./desktop/dms.nix
+    # Wayland desktop environment (Niri, DMS, Stylix)
     ./desktop/wm.nix
+    ./desktop/dms.nix
     ./desktop/theme.nix
 
+    # Applications & domain-specific tools
+    ./apps.nix
     ./comm.nix
     ./media.nix
     ./study.nix
-    ./system.nix
     ./games.nix
-    ./apps.nix
     ./backup.nix
-
   ];
 
-  nixpkgs.config.allowUnfree = true;
-  wayland.windowManager.hyprland.configType = "lua";
-
-  home.username = "nan";
-  home.homeDirectory = "/home/nan";
-  home.stateVersion = "25.05";
-
-  home.sessionVariables = {
-    XDG_MENU_PREFIX = "plasma-";
-
-    QT_QPA_PLATFORM = "wayland";
-    QT_QPA_PLATFORMTHEME = "kde";
-    QT_QPA_PLATFORMTHEME_QT6 = "kde";
-
-    QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-    QT_ENABLE_HIGHDPI_SCALING = "1";
-    QT_SCALE_FACTOR_ROUNDING_POLICY = "RoundPreferFloor";
-    XDG_DATA_DIRS = "$HOME/.nix-profile/share:$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/run/current-system/sw/share";
-    ELECTRON_OZONE_PLATFORM_HINT = "auto";
-
-    GTK_DECORATION_LAYOUT = "";
+  # ----------------------------------------------------------------------------
+  # User Identity & Home Manager Core
+  # ----------------------------------------------------------------------------
+  home = {
+    username = "nan";
+    homeDirectory = "/home/nan";
+    # Do not change unless performing a manual Home Manager state migration
+    stateVersion = "25.05";
   };
 
+  gtk = {
+    enable = true;
+    gtk3.extraCss = ''@import url("dank-colors.css");'';
+    gtk4.extraCss = ''@import url("dank-colors.css");'';
+  };
+
+  # Allow unfree packages in standalone Home Manager nixpkgs evaluation
+  nixpkgs.config.allowUnfree = true;
+
+  # Let Home Manager manage itself
   programs.home-manager.enable = true;
 }

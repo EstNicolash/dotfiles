@@ -1,53 +1,65 @@
+# ==============================================================================
+# User Desktop Theming (nixos/user/desktop/theme.nix)
+#
+# Defines Stylix Kanagawa scheme, typography, cursor, and GTK icon theme for
+# standalone Home Manager evaluation.
+# ==============================================================================
 { pkgs, ... }:
 
 {
-  fonts.fontconfig.enable = true;
-
   stylix = {
     enable = true;
-    autoEnable = true;
-    targets = {
-      rofi.enable = false;
-      # niri.enable = false;
-    };
-
     polarity = "dark";
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/nord.yaml";
-    #image = null;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/kanagawa.yaml";
+
+    targets = {
+        gtk.enable = false;
+        qt.enable = false;
+        dank-material-shell.enable = false;
+        wayprompt.enable = false; #DELETE
+    };
 
     cursor = {
       package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Ice";
+      name = "Bibata-Modern-Classic";
       size = 24;
     };
 
     fonts = {
       monospace = {
         package = pkgs.nerd-fonts.jetbrains-mono;
-        name = "JetBrainsMono Nerd Font Mono";
+        name = "JetBrainsMono Nerd Font";
       };
+
       sansSerif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Sans";
+        package = pkgs.inter;
+        name = "Inter";
       };
+
       serif = {
-        package = pkgs.dejavu_fonts;
-        name = "DejaVu Serif";
+        package = pkgs.noto-fonts;
+        name = "Noto Serif";
+      };
+
+      emoji = {
+        package = pkgs.noto-fonts-color-emoji;
+        name = "Noto Color Emoji";
       };
 
       sizes = {
-        applications = 12;
-        terminal = 14;
-        desktop = 10;
-        popups = 10;
+        applications = 11;
+        terminal = 12;
+        desktop = 11;
+        popups = 11;
       };
     };
+  };
 
-    opacity = {
-      applications = 1.0;
-      terminal = 1.0;
-      desktop = 1.0;
-      popups = 1.0;
+  gtk = {
+    enable = true;
+    iconTheme = {
+      package = pkgs.papirus-icon-theme;
+      name = "Papirus-Dark";
     };
   };
 }
